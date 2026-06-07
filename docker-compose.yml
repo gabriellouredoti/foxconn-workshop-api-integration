@@ -1,0 +1,29 @@
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  ollama-init:
+    image: ollama/ollama
+    depends_on:
+      - ollama
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10 &&
+      OLLAMA_HOST=http://ollama:11434 ollama pull gemma3:1b
+      "
+
+  pokemon-bot:
+    build: ./bot
+    container_name: pokemon-bot
+    depends_on:
+      - ollama
+    env_file:
+      - ./bot/.env
+
+volumes:
+  ollama_data:
